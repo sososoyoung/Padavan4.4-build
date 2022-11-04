@@ -1,4 +1,4 @@
-#修改TNAME: MI-4中的MI-4为你需要编译的型号，注意名称要与configs/templates/目录下的名字相同
+#修改TNAME: B70中的B70为你需要编译的型号，注意名称要与configs/templates/目录下的名字相同
 name: Build B70
 
 on: 
