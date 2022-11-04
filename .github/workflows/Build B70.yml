@@ -1,24 +1,18 @@
 #修改TNAME: B70中的B70为你需要编译的型号，注意名称要与configs/templates/目录下的名字相同
 name: Build B70
 
-on:
-  workflow_dispatch:
-    inputs:
-      name:
-        description: "Build Padavan"
-        required: true
-        default: "build"
-  # release:
-  #   types: [published]
+on: 
+  release:
+    types: [published]
   push:
     tags:
-      - "v*"
-  #  branches:
+    - 'v*'
+  #  branches: 
   #    - master
-  #  schedule:
-  #    - cron: 0 8 * * 5
-  #watch:
-  #  types: [started]
+#  schedule:
+#    - cron: 0 8 * * 5
+  watch:
+    types: [started]
 
 env:
   build_dir: /opt/padavan                                       # 源码目录
