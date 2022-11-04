@@ -1,7 +1,7 @@
 # Build from MeIsReallyBa's kernal4.4 repo
 # BY: TurBoTse
 
-name: Build from MeIsReallyBa's kernal4.4 repo
+name: Build padavan4.4 
 
 on: 
   workflow_dispatch:
