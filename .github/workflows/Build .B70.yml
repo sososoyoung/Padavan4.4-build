@@ -25,7 +25,7 @@ env:
   images_dir: /opt/images                                       # 固件目录
   work_dir: /opt/padavan/trunk                                  # 工作目录
   config_dir: /opt/padavan/trunk/configs/templates              # 设备模板目录
-  src_git: https://github.com/MeIsReallyBa/padavan-4.4.git      # 源码地址
+  src_git: https://github.com/hy5528/padavan-4.4.git      # 源码地址
 
 jobs:
   build:
@@ -38,8 +38,6 @@ jobs:
     strategy:
       matrix:
         include:
-          - build_variant: "mt7621"
-            targets: "B70"
           - build_variant: "mt7621"
             targets: "MI-4"
     steps:
