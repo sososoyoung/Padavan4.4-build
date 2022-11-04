@@ -29,9 +29,9 @@ jobs:
       matrix:
         include:
           - build_variant: "mt7621"
-            targets: "K2P"
+            targets: "B70"
           - build_variant: "mt7621"
-            targets: "R2100"
+            targets: "MI-4"
     steps:
       - name: Checkout main            # 导入主分支
         uses: actions/checkout@v2
