@@ -76,8 +76,9 @@ jobs:
           echo "CONFIG_FIRMWARE_INCLUDE_DDNSTO=n" >> $m.config #ddnsto  ~0.5M
           echo "CONFIG_FIRMWARE_INCLUDE_ALDRIVER=n" >> $m.config  #ALDRIVER  ~3m
           echo "CONFIG_FIRMWARE_INCLUDE_SQM=n" >> $m.config #SQM
-          ##CPU超频##
-          echo "CONFIG_FIRMWARE_INCLUDE_SQM=y" >> .config #SQM QOS#CPU超频          
+          #SQM QOS#
+          echo "CONFIG_FIRMWARE_INCLUDE_SQM=y" >> .config 
+          ##CPU超频##         
           echo "CONFIG_FIRMWARE_INCLUDE_OC=n" >> $m.config #CPU超频开关
           echo 'CONFIG_FIRMWARE_MT7621_OC="0x312"' >> $m.config #此处填写对应频率的十六进制：1000Mhz=0x312 1100Mhz=0x362 1120Mhz=0x372 1200Mhz=0x3B2
           for MOD in UFSD FAT EXFAT EXT2 EXT3 EXT4 XFS FUSE SWAP; do
