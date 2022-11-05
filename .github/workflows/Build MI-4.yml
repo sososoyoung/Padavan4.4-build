@@ -2,7 +2,7 @@
 # Build from MeIsReallyBa's kernal4.4 repo
 # BY: TurBoseT
 
-name: Build padavan4.4 
+name: Build MI-4
 
 on: 
   workflow_dispatch:
