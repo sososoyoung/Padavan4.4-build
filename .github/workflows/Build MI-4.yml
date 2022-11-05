@@ -1,5 +1,4 @@
 #修改TNAME: MI-4中的MI-4为你需要编译的型号，注意名称要与configs/templates/目录下的名字相同
-#修改TNAME: 360P2 中的360P2为你需要编译的型号，注意名称要与configs/templates/目录下的名字相同
 name: Build MI-4 Padavan
 
 on: 
