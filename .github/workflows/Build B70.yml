@@ -66,7 +66,7 @@ jobs:
         echo "CONFIG_FIRMWARE_INCLUDE_TROJAN=y" >> .config #集成trojan执行文件 ~1.2M
         echo "CONFIG_FIRMWARE_INCLUDE_SSOBFS=n" >> .config #simple-obfs混淆插件
         ##KMS##
-        echo "CONFIG_FIRMWARE_INCLUDE_VLMCSD=y" >> configs
+        echo "CONFIG_FIRMWARE_INCLUDE_VLMCSD=y" >> .configs
         ##广告管理##
         echo "CONFIG_FIRMWARE_INCLUDE_ADBYBY=y" >> .config #adbyby plus+
         ##DNS服务##
