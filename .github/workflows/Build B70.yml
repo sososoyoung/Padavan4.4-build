@@ -28,7 +28,6 @@ on:
         description: 'whether to notify through pushplus'
         default: 'false'
 
-
 jobs:
   build:
     runs-on: ubuntu-20.04
