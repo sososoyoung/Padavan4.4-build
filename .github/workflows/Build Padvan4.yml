@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
   
 env:
-  src_git: https://github.com/hanwckf/padavan-4.4.git
+  src_git: https://github.com/vb1980/padavan-4.4.git
   build_dir: /opt/rt-n56u  
   images_dir: /opt/images
   ENABLED_CFG: |
