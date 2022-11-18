@@ -1,3 +1,13 @@
+name: Build Padavan4
+
+# Controls when the action will run. 
+on:
+#  schedule:
+#    - cron: "0 2 * * *"
+  push:
+    branches:
+      - master
+  workflow_dispatch:
 env:
   build_dir: /opt/padavan                                       # 源码目录
   images_dir: /opt/images                                       # 固件目录
