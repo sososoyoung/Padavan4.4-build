@@ -8,6 +8,7 @@ on:
     branches:
       - master
   workflow_dispatch:
+
 env:
   build_dir: /opt/padavan                                       # 源码目录
   images_dir: /opt/images                                       # 固件目录
