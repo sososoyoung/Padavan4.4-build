@@ -1,32 +1,24 @@
 #修改TNAME: B70中的B70为你需要编译的型号，注意名称要与configs/templates/目录下的名字相同
 name: Build B70 MeIsReallyBa Padavan
 
-on: 
+on:
   workflow_dispatch:
     inputs:
-      firmwarever:
-        description: 'firmware''s version'
+      name:
+        description: "Build Padavan"
         required: true
-        default: '20201015'
-      busyboxver:
-        type: choice
-        description: 'busybox''s version'
-        options:
-        - 1.24.x
-        - 1.34.1
-        default: '1.24.x'
-      ssp:
-        type: boolean
-        description: 'whether to apply the patch for download ssp bin from local or remote url'
-        default: 'false'
-      uploadwet:
-        type: boolean
-        description: 'whether to upload firmware to wetransfer'
-        default: 'false'
-      pushplus:
-        type: boolean
-        description: 'whether to notify through pushplus'
-        default: 'false'
+        default: "build"
+  # release:
+  #   types: [published]
+  push:
+    tags:
+      - "v*"
+  #  branches:
+  #    - master
+  #  schedule:
+  #    - cron: 0 8 * * 5
+  #watch:
+  #  types: [started]
 
 jobs:
   build:
