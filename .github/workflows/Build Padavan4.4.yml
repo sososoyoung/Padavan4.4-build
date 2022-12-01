@@ -19,7 +19,7 @@ on:
   #watch:
   #  types: [started]
   
-  env:
+env:
   build_dir: /opt/padavan                                       # 源码目录
   images_dir: /opt/images                                       # 固件目录
   work_dir: /opt/padavan/trunk                                  # 工作目录
