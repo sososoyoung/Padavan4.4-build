@@ -1,41 +1,30 @@
-name: Build Padavan4.4
+# Build from hanwckf's kernal4.4 repo
+# BY: TurBoTse
 
-on:
+name: Build from hanwckf's kernal4.4 repo
+
+on: 
   workflow_dispatch:
     inputs:
-      name:
-        description: "Build Padavan"
-        required: true
-        default: "build"
-  # release:
-  #   types: [published]
-  push:
-    tags:
-      - "v*"
-  #  branches:
-  #    - master
-  #  schedule:
-  #    - cron: 0 8 * * 5
-  #watch:
-  #  types: [started]
-  
+#  schedule:                                                    # 自动编译
+#    - cron: 0 19 * * *                                         # 每天国际时间19点，北京时间凌晨3点执行
+  watch:                                                        # 监视操作
+    types: [started]                                            # 点击 Star 之后
 env:
   build_dir: /opt/padavan                                       # 源码目录
   images_dir: /opt/images                                       # 固件目录
   work_dir: /opt/padavan/trunk                                  # 工作目录
   config_dir: /opt/padavan/trunk/configs/templates              # 设备模板目录
-  src_git: https://github.com/monw/padavan.git       
+  src_git: https://github.com/hanwckf/padavan-4.4.git           # 源码地址
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   build:
     name: build
     runs-on: ubuntu-20.04
-    if: ${{ !(github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) }}
+    if: github.event.repository.owner.id == github.event.sender.id  # 自己点的 Star
     env:
       build_variant: ${{ matrix.build_variant }}
       targets: ${{ matrix.targets }}
-      images_dir: /opt/images
     strategy:
       matrix:
         include:
@@ -43,51 +32,51 @@ jobs:
             targets: "MI-4"
           - build_variant: "mt7621-usb-1"
             targets: "B70"
+
     steps:
-      - uses: actions/checkout@v2
-      - name: Prepare environment
-        run: |
+      - name: Checkout main            # 导入主分支
+        uses: actions/checkout@v2
+      - name: Prepare environment      # 准备编译环境
+        run: |                         # 安装依赖包
           sudo apt update
           sudo apt install libtool-bin gperf python3-docutils autopoint gettext
+          sudo timedatectl set-timezone 'Asia/Shanghai'  # 设置时区
+      - name: Clone source code
+        run: |                         # 克隆源码
+          git clone --depth=1 $src_git $build_dir
       - name: Run shellcheck
-        run: sh ./trunk/tools/shellcheck.sh
+        run: |
+          cd $work_dir
+          if [ -f ./tools/shellcheck.sh ]; then sh ./tools/shellcheck.sh; fi
       - name: Prepare toolchain
-        run: |
-          cd toolchain-mipsel
+        run: |                         # 下载预编译的构建工具链
+          mkdir -p $images_dir
+          cd $build_dir/toolchain-mipsel
           sh dl_toolchain.sh
-      - name: Start build
-        run: |
-          cd trunk
-          mkdir -p ${images_dir}
+      - name: Modify custom configs
+        run: |                         # 拷贝文件并修改
+          if [ -d hanwckf_4.4/config ]; then cp -f hanwckf_4.4/config/* $work_dir; fi
+          if [ -d hanwckf_4.4/modify ]; then cp -rf hanwckf_4.4/modify/* $work_dir; fi
+          if [ -d hanwckf_4.4/scripts ]; then cp -f hanwckf_4.4/scripts/* $work_dir; fi
+          cd $config_dir
+          for m in $targets; do if [ -f $m.config ]; then \
+          for MOD in UFSD FAT EXFAT EXT2 EXT3 EXT4 XFS FUSE SWAP; do
+              sed -i "s/CONFIG_FIRMWARE_ENABLE_${MOD}=y/CONFIG_FIRMWARE_ENABLE_${MOD}=n/" $m.config; done; \
+          for MOD in UVC SERIAL AUDIO LPRD U2EC HDPARM PARTED SMBD FTPD ARIA ARIA_WEB_CONTROL DUMP1090 RTL_SDR HID XFRM QOS IMQ IFB IPSET NFSD NFSC CIFS NTFS_3G TCPDUMP SMBD36 WINS SMBD_SYSLOG RPL2TP EAP_PEAP HTTPS SFTP DROPBEAR DROPBEAR_FAST_CODE OPENSSH OPENVPN SSWAN OPENSSL_EC OPENSSL_EXE XUPNPD MINIDLNA FIREFLY FFMPEG_NEW TRANSMISSION TRANSMISSION_WEB_CONTROL CURL GDUT_DRCOM DOGCOM MINIEAP NJIT_CLIENT NAPT66 SOFTETHERVPN_SERVER SOFTETHERVPN_CLIENT SOFTETHERVPN_CMD VLMCSD TTYD LRZSZ HTOP NANO IPERF3 MTR SOCAT SRELAY MENTOHUST SCUTCLIENT FRPC FRPS TUNSAFE WIREGUARD SHADOWSOCKS XRAY V2RAY TROJAN SSOBFS ADBYBY KOOLPROXY SMARTDNS SMARTDNSBIN ADGUARDHOME CADDY CADDYBIN WYY WYYBIN ZEROTIER ALIDDNS DDNSTO ALDRIVER MENTOHUST SQM DNSFORWARDER CLOUDFLAREDDNS NVPPROXY DDNS_SSL SSSERVER NPC KUMASOCKS IPT2SOCKS MICROSOCKS; do
+              sed -i "s/CONFIG_FIRMWARE_INCLUDE_${MOD}=y/CONFIG_FIRMWARE_INCLUDE_${MOD}=n/" $m.config; done; \
+          fi; done
+          cd $work_dir
+          for m in $targets; do if [ -f $m.config ]; then echo "拷贝 $m.config"; cp -f ./$m.config $config_dir/$m.config; fi; done; \
+          for m in $targets; do if [ -f public.sh ]; then echo "执行 public.sh"; sh ./public.sh; fi; if [ -f $m.sh ]; then echo "执行 $m.sh"; sh ./$m.sh; fi; done; \
+      - name: Start build firmware
+        run: |                         # 执行构建固件
+          cd $work_dir
           for m in $targets; do fakeroot ./build_firmware_ci $m; \
-          if [ $? = 0 ]; then cp -f images/*.trx ${images_dir}/$m.trx; else exit 1; fi; \
+          if [ $? = 0 ]; then cp -f images/*.trx $images_dir/Hanwckf_${m}_$(date +%Y%m%d).trx; else exit 1; fi; \
           ./clear_tree_simple >/dev/null 2>&1; done
-      - name: Create archive
-        if: ${{ github.event_name != 'release' && success() }}
-        run: |
-          ls -lh ${images_dir}
-          GIT_VERSION=`git rev-parse --short=7 HEAD 2>/dev/null` && [ -n "$GIT_VERSION" ] && \
-          image_name=images_${build_variant}_${GIT_VERSION} || image_name=images_${build_variant}
-          cd ${images_dir}; md5sum *.trx |tee md5sum.txt; 7z a -mx=9 ${image_name}.7z ./*
-          echo "image_name=${image_name}" >> $GITHUB_ENV
       - name: Upload images to Artifact
-        if: ${{ github.event_name != 'release' && success() }}
+        if: ${{ success() }}
         uses: actions/upload-artifact@v2.2.1
         with:
-          name: ${{ env.image_name }}
-          path: ${{ env.images_dir }}/*.7z
-      - name: Upload firmware to WeTransfer
-        run: |
-          curl -fsSL git.io/file-transfer | sh
-          ./transfer wet -s -p 16 --no-progress /opt/images/*.trx 2>&1 | tee wetransfer.log
-          echo "::warning file=wetransfer.com::$(cat wetransfer.log | grep https)"
-      - name: Upload images to Releases
-        if: ${{ github.event_name == 'release' && success() }}
-        uses: svenstaro/upload-release-action@2.2.0
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ${{ env.images_dir }}/*.trx
-          tag: ${{ github.ref }}
-          overwrite: true
-          file_glob: true
-          
+          name: Hanwckf_4.4_${{ env.build_variant }}
+          path: ${{ env.images_dir }}        
