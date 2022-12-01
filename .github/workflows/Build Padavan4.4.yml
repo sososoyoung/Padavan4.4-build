@@ -1,17 +1,23 @@
 name: Build Padavan
 
-on: 
-  release:
-    types: [published]
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: "Build Padavan"
+        required: true
+        default: "build"
+  # release:
+  #   types: [published]
   push:
     tags:
-    - 'v*'
-  #  branches: 
+      - "v*"
+  #  branches:
   #    - master
-  schedule:
-    - cron: 0 8 * * 5
-  watch:
-    types: [started]
+  #  schedule:
+  #    - cron: 0 8 * * 5
+  #watch:
+  #  types: [started]
 
 jobs:
   build:
