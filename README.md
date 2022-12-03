@@ -23,4 +23,4 @@ user: admin
 password: admin
 
 
-TVBox空壳
+TVBox空壳，自行添加源。
