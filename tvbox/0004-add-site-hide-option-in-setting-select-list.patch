@@ -1,0 +1,86 @@
+From b7506e5b945f22e3b077d92d3943a58def851558 Mon Sep 17 00:00:00 2001
+From: pieceking <1@1.com>
+Date: Sat, 22 Oct 2022 22:33:22 +0800
+Subject: [PATCH 4/6] add site hide option in setting select list
+
+---
+ .../main/java/com/github/tvbox/osc/api/ApiConfig.java    | 1 +
+ .../main/java/com/github/tvbox/osc/bean/SourceBean.java  | 9 +++++++++
+ .../com/github/tvbox/osc/ui/activity/HomeActivity.java   | 5 ++++-
+ .../tvbox/osc/ui/fragment/ModelSettingFragment.java      | 5 ++++-
+ 4 files changed, 18 insertions(+), 2 deletions(-)
+
+diff --git a/app/src/main/java/com/github/tvbox/osc/api/ApiConfig.java b/app/src/main/java/com/github/tvbox/osc/api/ApiConfig.java
+index 8bb7c1d..4378639 100644
+--- a/app/src/main/java/com/github/tvbox/osc/api/ApiConfig.java
++++ b/app/src/main/java/com/github/tvbox/osc/api/ApiConfig.java
+@@ -300,6 +300,7 @@ public class ApiConfig {
+             sb.setSearchable(DefaultConfig.safeJsonInt(obj, "searchable", 1));
+             sb.setQuickSearch(DefaultConfig.safeJsonInt(obj, "quickSearch", 1));
+             sb.setFilterable(DefaultConfig.safeJsonInt(obj, "filterable", 1));
++            sb.setHide(DefaultConfig.safeJsonInt(obj, "hide", 0));
+             sb.setPlayerUrl(DefaultConfig.safeJsonString(obj, "playUrl", ""));
+             if(obj.has("ext") && (obj.get("ext").isJsonObject() || obj.get("ext").isJsonArray())){
+                 sb.setExt(obj.get("ext").toString());
+diff --git a/app/src/main/java/com/github/tvbox/osc/bean/SourceBean.java b/app/src/main/java/com/github/tvbox/osc/bean/SourceBean.java
+index ff11953..de0e4e3 100644
+--- a/app/src/main/java/com/github/tvbox/osc/bean/SourceBean.java
++++ b/app/src/main/java/com/github/tvbox/osc/bean/SourceBean.java
+@@ -10,6 +10,7 @@ public class SourceBean {
+     private int searchable; // 是否可搜索
+     private int quickSearch; // 是否可以快速搜索
+     private int filterable; // 可筛选?
++    private int hide; // 设置的选择列表里隐藏
+     private String playerUrl; // 站点解析Url
+     private String ext; // 扩展数据
+     private String jar; // 自定义jar
+@@ -81,6 +82,14 @@ public class SourceBean {
+         this.filterable = filterable;
+     }
+ 
++    public int getHide() {
++        return hide;
++    }
++
++    public void setHide(int hide) {
++        this.hide = hide;
++    }
++
+     public String getExt() {
+         return ext;
+     }
+diff --git a/app/src/main/java/com/github/tvbox/osc/ui/activity/HomeActivity.java b/app/src/main/java/com/github/tvbox/osc/ui/activity/HomeActivity.java
+index 4873766..882adc9 100644
+--- a/app/src/main/java/com/github/tvbox/osc/ui/activity/HomeActivity.java
++++ b/app/src/main/java/com/github/tvbox/osc/ui/activity/HomeActivity.java
+@@ -584,7 +584,10 @@ public class HomeActivity extends BaseActivity {
+     }
+ 
+     void showSiteSwitch() {
+-        List<SourceBean> sites = ApiConfig.get().getSourceBeanList();
++        List<SourceBean> sites = new ArrayList<>();
++        for (SourceBean sb : ApiConfig.get().getSourceBeanList()) {
++            if (sb.getHide() == 0) sites.add(sb);
++        }
+         if (sites.size() > 0) {
+             String homeSourceKey = ApiConfig.get().getHomeSourceBean().getKey();
+             SelectDialog<SourceBean> dialog = new SelectDialog<>(HomeActivity.this);
+diff --git a/app/src/main/java/com/github/tvbox/osc/ui/fragment/ModelSettingFragment.java b/app/src/main/java/com/github/tvbox/osc/ui/fragment/ModelSettingFragment.java
+index f5f869f..f3b4472 100644
+--- a/app/src/main/java/com/github/tvbox/osc/ui/fragment/ModelSettingFragment.java
++++ b/app/src/main/java/com/github/tvbox/osc/ui/fragment/ModelSettingFragment.java
+@@ -199,7 +199,10 @@ public class ModelSettingFragment extends BaseLazyFragment {
+             @Override
+             public void onClick(View v) {
+                 FastClickCheckUtil.check(v);
+-                List<SourceBean> sites = ApiConfig.get().getSourceBeanList();
++                List<SourceBean> sites = new ArrayList<>();
++                for (SourceBean sb : ApiConfig.get().getSourceBeanList()) {
++                    if (sb.getHide() == 0) sites.add(sb);
++                }
+                 if (sites.size() > 0) {
+                     SelectDialog<SourceBean> dialog = new SelectDialog<>(mActivity);
+                     dialog.setTip("请选择首页数据源");
+-- 
+2.37.3.windows.1
+
