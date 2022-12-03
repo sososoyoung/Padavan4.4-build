@@ -4,9 +4,21 @@ name: Build Padavan
 on:
   workflow_dispatch:
     inputs:
-      routemodel:
-        description: 'Route Model'
+      name:
+        description: "Build Padavan"
         required: true
+        default: "build"
+  # release:
+  #   types: [published]
+  push:
+    tags:
+      - "v*"
+  #  branches:
+  #    - master
+  #  schedule:
+  #    - cron: 0 8 * * 5
+  #watch:
+  #  types: [started]
         type: choice
         options:
         - 'B70'
