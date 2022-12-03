@@ -23,4 +23,4 @@ user: admin
 password: admin
 
 
-TVBox空壳，自行添加源。
+TVBox-J Build为本地爬虫-俊版，TVBox-TV为本地爬虫Fongmi/TV版（暂时有问题，待修复）。
