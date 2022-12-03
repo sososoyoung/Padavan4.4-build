@@ -1,26 +1,16 @@
 #修改TNAME: K2P-5.0 中的K2P-5.0为你需要编译的型号，注意名称要与configs/templates/目录下的名字相同 PSG1208
-name: Build Padavan
+name: Build Padavan测试
 
 on:
   workflow_dispatch:
     inputs:
-      name:
-        description: "Build Padavan"
+      routemodel:
+        description: 'Route Model'
         required: true
-        default: "build"
-  # release:
-  #   types: [published]
-  push:
-    tags:
-      - "v*"
-  #  branches:
-  #    - master
-  #  schedule:
-  #    - cron: 0 8 * * 5
-  #watch:
-  #  types: [started]
+        type: choice
         options:
         - 'B70'
+        - 'Mi-4'
 
 env:
   TZ: Asia/Shanghai
