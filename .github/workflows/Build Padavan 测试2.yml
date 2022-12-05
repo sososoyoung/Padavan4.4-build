@@ -1,27 +1,43 @@
-name: Build Padavan 测试2
+name: Build hanwckf's kernal4.4 Padavan
 
 on:
   workflow_dispatch:
     inputs:
-      name:
-        description: "Build Padavan"
-        required: true
-        default: "build"
-  # release:
-  #   types: [published]
-  push:
-    tags:
-      - "v*"
-  #  branches:
-  #    - master
-  #  schedule:
-  #    - cron: 0 8 * * 5
-  #watch:
-  #  types: [started]
-  
+      target:
+        type: choice
+        description: 'target to compile'
+        options:
+        - CR660x
+        - JCG-Q20
+        - JCG-AC860M
+        - JCG-836PRO
+        - JCG-Y2
+        - DIR-878
+        - DIR-882
+        - K2P
+        - K2P-USB
+        - NETGEAR-BZV
+        - MR2600
+        - MI-R3P
+        - XY-C1
+      uploadwet:
+        type: boolean
+        description: 'whether to upload firmware to wetransfer'
+        default: 'true'
+      pushplus:
+        type: boolean
+        description: 'whether to notify through pushplus'
+        default: 'false'
+env:
+  REPOSITORY_URL: https://github.com/hanwckf/padavan-4.4.git
+  TOOLCHAIN_URL: https://github.com/hanwckf/padavan-toolchain/releases/download/linux-4.4-v1.0/mipsel-linux-uclibc.tar.xz
+  WORK_PATH: /opt/padavan-4.4
+  TIME_ZONE: Asia/Shanghai
+  FIRMWARE_AUTHOR: hanwckf
+  FIRMWARE_PATH: /opt/firmwares
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-18.04
     if: github.event.repository.owner.id == github.event.sender.id
 
     steps:
@@ -32,75 +48,67 @@ jobs:
         DEBIAN_FRONTEND: noninteractive
       run: |
         sudo apt-get update
-        sudo apt-get -y install unzip libtool-bin curl cmake gperf gawk flex bison nano xxd fakeroot \
-        cpio git python-docutils gettext automake autopoint texinfo build-essential help2man \
-        pkg-config zlib1g-dev libgmp3-dev libmpc-dev libmpfr-dev libncurses5-dev libltdl-dev wget
+        sudo apt install unzip libtool-bin curl cmake gperf gawk flex bison nano xxd \
+        fakeroot kmod cpio git python3-docutils gettext automake autopoint \
+        texinfo build-essential help2man pkg-config zlib1g-dev libgmp3-dev \
+        libmpc-dev libmpfr-dev libncurses5-dev libltdl-dev wget libc-dev-bin
+        sudo timedatectl set-timezone "$TIME_ZONE"
     - name: Clone source code
       run: |
-        git clone --depth=1 https://github.com/vb1980/padavan-4.4.git /opt/padavan
-        cd /opt/padavan/toolchain-mipsel
-        sh dl_toolchain.sh
-        mkdir -p /opt/images/
-    
-    - name: Build Firmware
-      env:
-        TNAME: B70
+        git clone --depth=1 $REPOSITORY_URL $WORK_PATH
+        cd $WORK_PATH/toolchain-mipsel
+        mkdir -p toolchain-4.4.x
+        wget $TOOLCHAIN_URL
+        tar -xf mipsel-linux-uclibc.tar.xz -C toolchain-4.4.x
+    - name: Set environment variables
       run: |
-        cd /opt/padavan/trunk
-        if [ ! -f configs/templates/$TNAME.config ] ; then
-        echo "configs/templates/$TNAME.config not found "
+        git config --global log.date format:'%Y%m%d'
+        cd $WORK_PATH
+        echo "FIRMWARE_VERSION=$(git log -1 --pretty=format:"%cd")" >> $GITHUB_ENV
+        echo "FIRMWARE_DATEPREFIX=$(date +"%Y%m%d")" >> $GITHUB_ENV
+    - name: Custom config
+      run: |
+        cd $WORK_PATH/trunk
+        if [ ! -f configs/templates/${{ github.event.inputs.target }}.config ] ; then
+        echo "configs/templates/${{ github.event.inputs.target }}.config not found"
         exit 1
         fi
-        cp -f configs/templates/$TNAME.config .config
-        ################################################################################################
-        #因不同型号配置功能不一样，所以先把配置项删除，如果你自己要添加其他的，也要写上删除这一条，切记！！！
-        ################################################################################################
-        sed -i 's/CONFIG_FIRMWARE_INCLUDE_DNSFORWARDER=y/CONFIG_FIRMWARE_INCLUDE_DNSFORWARDER=n/g' .config
-        sed -i 's/CONFIG_FIRMWARE_INCLUDE_MENTOHUST=y/CONFIG_FIRMWARE_INCLUDE_MENTOHUST=n/g' .config
-        sed -i 's/CONFIG_FIRMWARE_INCLUDE_SCUTCLIENT=y/CONFIG_FIRMWARE_INCLUDE_SCUTCLIENT=n/g' .config
-        sed -i 's/CONFIG_FIRMWARE_INCLUDE_SRELAY=y/CONFIG_FIRMWARE_INCLUDE_SRELAY=n/g' .config
-        sed -i 's/CONFIG_FIRMWARE_INCLUDE_SHADOWSOCKS=y/CONFIG_FIRMWARE_INCLUDE_SHADOWSOCKS=n/g' .config
-        ######################################################################
-        #以下选项是定义你需要的功能（y=集成,n=忽略），重新写入到.config文件
-        ######################################################################
-        ##科学上网##
-        echo "CONFIG_FIRMWARE_INCLUDE_SHADOWSOCKS=y" >> .config #科学上网插件，选择n后全部有关插件都不集成
-        echo "CONFIG_FIRMWARE_INCLUDE_XRAY=n" >> .config #集成xray执行文件 ~4.5M
-        echo "CONFIG_FIRMWARE_INCLUDE_V2RAY=n" >> .config #集成v2ray执行文件
-        echo "CONFIG_FIRMWARE_INCLUDE_TROJAN=y" >> .config #集成trojan执行文件 ~1.2M
-        echo "CONFIG_FIRMWARE_INCLUDE_SSOBFS=y" >> .config #simple-obfs混淆插件
-        ##科学上网##
-        ##广告管理##
-        echo "CONFIG_FIRMWARE_INCLUDE_ADBYBY=y" >> .config #adbyby plus+
-        ##DNS服务##
-        echo "CONFIG_FIRMWARE_INCLUDE_SMARTDNS=n" >> .config #smartdns
-        echo "CONFIG_FIRMWARE_INCLUDE_ADGUARDHOME=n" >> .config #adg DNS去AD
-        ##内网穿透服务##
-        echo "CONFIG_FIRMWARE_INCLUDE_ZEROTIER=y" >> .config #zerotier ~1.3M
-        echo "CONFIG_FIRMWARE_INCLUDE_ALIDDNS=y" >> .config #aliddns
-        echo "CONFIG_FIRMWARE_INCLUDE_DDNSTO=y" >> .config #ddnsto ~0.5M
-        echo "CONFIG_FIRMWARE_INCLUDE_WIREGUARD=y" >> .config #wireguard ~10k
-        ##内网穿透服务##
-        echo "CONFIG_FIRMWARE_INCLUDE_ALDRIVER=y" >> .config  #ALDRIVER  ~3m
-        echo "CONFIG_FIRMWARE_INCLUDE_MENTOHUST=n" >> .config #mentohust
-        
-        ##流控QOS##
-        echo "CONFIG_FIRMWARE_INCLUDE_SQM=y" >> .config #SQM QOS
-        #CPU超频
-        echo "CONFIG_FIRMWARE_INCLUDE_OC=n" >> .config #CPU超频开关
-        echo 'CONFIG_FIRMWARE_MT7621_OC="0x312"' >> .config #此处填写对应频率的十六进制：1000Mhz=0x312 1100Mhz=0x362 1120Mhz=0x372 1200Mhz=0x3B2
-        #########################################################################################
-        #自定义添加其它功能请参考源码configs/templates/目录下的config文件。按照上面的格式添加即可
-        #格式如下：
-        #sed -i '/自定义项/d' .config
-        #echo "自定义项=y" >> .config
-        #########################################################################################
-        sudo ./clear_tree
-        sudo ./build_firmware_modify $TNAME 0
-        sudo mv -f images/*.trx /opt/images/
+        cp -f configs/templates/${{ github.event.inputs.target }}.config .config
+        sed -i "s/FIRMWARE_BUILDS_REV=.*/FIRMWARE_BUILDS_REV=${FIRMWARE_VERSION}/g" ./versions.inc
+    - name: Build firmware
+      run: |
+        cd $WORK_PATH/trunk
+        ./clear_tree
+        fakeroot ./build_firmware_modify ${{ github.event.inputs.target }}
+    - name: Organize firmware files
+      id: organize
+      run: |
+        mkdir -p $FIRMWARE_PATH/
+        cd $WORK_PATH/trunk/images
+        for firmwarefile in $(ls *.trx)
+        do sudo mv $firmwarefile $FIRMWARE_PATH/${FIRMWARE_DATEPREFIX}"_"${FIRMWARE_AUTHOR}"_"${{ github.event.inputs.target }}"_kernal4.4.trx"
+        done
+        cd $FIRMWARE_PATH
+        echo "FIRMWARE=$PWD" >> $GITHUB_ENV
+        echo "STATUS=success" >> $GITHUB_ENV
     - name : Upload packages
       uses: actions/upload-artifact@master
-      if: always()
+      if: env.STATUS == 'success'
       with:
-        name: Padavan-packages
-        path: /opt/images
+        name: Padavan44-packages
+        path: ${{ env.FIRMWARE }}
+    - name: Upload firmware to WeTransfer
+      if: env.STATUS == 'success' && github.event.inputs.uploadwet == 'true'
+      run: |
+        curl -fsSL git.io/file-transfer | sh
+        ./transfer wet -s -p 16 --no-progress ${FIRMWARE} 2>&1 | tee wetransfer.log
+        echo "::warning file=wetransfer.com::$(cat wetransfer.log | grep -o -E "https?://[a-zA-Z0-9\.\/_&=@$%?~#-]*")"
+        echo "WETRANSFER_URL=$(cat wetransfer.log | grep -o -E "https?://[a-zA-Z0-9\.\/_&=@$%?~#-]*")" >> $GITHUB_ENV
+    - name: PushPlus Notification
+      uses: vb1980/Action_PushPlus@master
+      if: env.STATUS == 'success' && github.event.inputs.pushplus == 'true'
+      with:
+        token: ${{ secrets.PUSHTOKEN }}
+        title: ${{ github.event.inputs.target }}_Build_Completed
+        content: Congratulations,<br/>&nbsp;&nbsp;Your **${{ github.event.inputs.target }}** padavan(4.4 kernal) firmware build completed!<br/>&nbsp;&nbsp;🐮WeTransfer Download Url:${{ env.WETRANSFER_URL }}<br/>&nbsp;&nbsp;Enjoy it🎈🎁!
+
