@@ -1,0 +1,61 @@
+name: build测试
+
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: "Build Padavan"
+        required: true
+        default: "build"
+  # release:
+  #   types: [published]
+  push:
+    tags:
+      - "v*"
+  #  branches:
+  #    - master
+  #  schedule:
+  #    - cron: 0 8 * * 5
+  #watch:
+  #  types: [started]
+    
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        target: [B70]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '^1.18.6'
+      - name: Prepare
+        run: |
+          sudo apt update
+          sudo apt install libtool-bin gperf python3-docutils autopoint gettext
+          # https://github.com/actions/setup-go/issues/107
+          echo "${GOROOT}/bin" >> $GITHUB_PATH
+    - name: Clone source code
+      run: |
+        git clone --depth=1 https://github.com/hy5528/Padavan-4.4.git /opt/rt-n56u
+        cd /opt/rt-n56u/toolchain-mipsel
+        sh dl_toolchain.sh
+        mkdir -p /opt/images/      
+      - name: Build
+        run: |
+          make ${{ matrix.target }}
+          echo "TAG_ANME=$(date +%Y%m%d)" >> $GITHUB_ENV
+      - uses: actions/upload-artifact@v3
+        with:
+          name: images
+          path: trunk/images/*.trx
+          
+      - name: Upload firmware to release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: Padavan-4.4
+          files: trunk/images/*.trx
