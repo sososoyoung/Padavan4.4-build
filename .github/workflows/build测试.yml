@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        target: [B70]
+        target: [QM-B1]
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
@@ -39,7 +39,7 @@ jobs:
           echo "${GOROOT}/bin" >> $GITHUB_PATH
       - name: Clone source code
         run: |
-          git clone --depth=1 https://github.com/hy5528/padavan-1.git /opt/rt-n56u
+          git clone --depth=1 https://github.com/hy5528/padavan-4.4.git /opt/rt-n56u
           cd /opt/rt-n56u/toolchain-mipsel
           sh dl_toolchain.sh
           mkdir -p /opt/images/      
