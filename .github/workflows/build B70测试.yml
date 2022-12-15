@@ -14,31 +14,22 @@ jobs:
       matrix:
         target: [B70]
     steps:
-      - uses: actions/checkout@v3
-      - uses: hendrikmuhs/ccache-action@v1.2
-      - uses: actions/setup-go@v3
-        with:
-          go-version: '^1.18.6'
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-v1
-          restore-keys: |
-            ${{ runner.os }}-go-
-      - name: Prepare
-        run: |
-          sudo apt-get update
-          sudo apt-get -y install unzip libtool-bin curl cmake gperf gawk flex bison nano xxd fakeroot \
-          cpio git python-docutils gettext automake autopoint texinfo build-essential help2man \
-          pkg-config zlib1g-dev libgmp3-dev libmpc-dev libmpfr-dev libncurses5-dev libltdl-dev wget
-      - name: Clone source code
-        run: |
-          git clone --depth=1 https://github.com/Anvenante/Padavan-4.4-tsl0922.git /opt/rt-n56u
-          cd /opt/rt-n56u/toolchain-mipsel
-          sh dl_toolchain.sh
-          mkdir -p /opt/images/
+    - name: Checkout
+      uses: actions/checkout@master
+    - name: Initialization environment
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install unzip libtool-bin curl cmake gperf gawk flex bison nano xxd fakeroot \
+        cpio git python-docutils gettext automake autopoint texinfo build-essential help2man \
+        pkg-config zlib1g-dev libgmp3-dev libmpc-dev libmpfr-dev libncurses5-dev libltdl-dev wget
+    - name: Clone source code
+      run: |
+        git clone --depth=1 https://github.com/hy5528/padavan-4.4.git /opt/rt-n56u
+        cd /opt/rt-n56u/toolchain-mipsel
+        sh dl_toolchain.sh
+        mkdir -p /opt/images/
       
       - name: Build
         run: |
