@@ -8,11 +8,9 @@ on:
 
 jobs:
   build:
-    name: build
-    runs-on: ubuntu-22.04
-  strategy:
-      matrix:
-        target: [B70]
+    runs-on: ubuntu-20.04
+    if: github.event.repository.owner.id == github.event.sender.id
+    
     steps:
       - uses: actions/checkout@v3
       - uses: hendrikmuhs/ccache-action@v1.2
@@ -41,14 +39,9 @@ jobs:
           mkdir -p /opt/images/
       
       - name: Build
-        env:
-          TNAME: B70        
-          run: |
+        run: |
           cd trunk
-          mkdir -p ${images_dir}
-          for m in $targets; do fakeroot ./build_firmware_ci $m; \
-          if [ $? = 0 ]; then cp -f images/*.trx ${images_dir}/$m.trx; else exit 1; fi; \
-          ./clear_tree_simple >/dev/null 2>&1; done         
+          fakeroot ./build_firmware_ci B70        
       - uses: actions/upload-artifact@v3
         with:
           name: images
