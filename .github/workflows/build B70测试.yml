@@ -44,7 +44,7 @@ jobs:
     - name: Start build
       run: |
         cd trunk
-        fakeroot ./build_firmware_ci K2P
+        fakeroot ./build_firmware_ci B70
     - name: Upload image
       uses: actions/upload-artifact@v3
       with:
