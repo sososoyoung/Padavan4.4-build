@@ -21,11 +21,8 @@ on:
 
 jobs:
   build:
-    name: build
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        target: [B70]
+    runs-on: ubuntu-20.04
+    if: github.event.repository.owner.id == github.event.sender.id
 
     steps:
     - name: Checkout
@@ -44,21 +41,12 @@ jobs:
         cd /opt/rt-n56u/toolchain-mipsel
         sh dl_toolchain.sh
         mkdir -p /opt/images/
-    - name: Build
-      run: |
-        make ${{ matrix.target }}
-        echo "TAG_ANME=$(date +%Y%m%d)" >> $GITHUB_ENV
-    - uses: actions/upload-artifact@v3
-      with:
-        name: images
-        path: trunk/images/*.trx
-    - uses: rickstaa/action-create-tag@v1
-      with:
-        tag: ${{ env.TAG_ANME }}
-        force_push_tag: true
-    - uses: ncipollo/release-action@v1
-      with:
-        commit: ${{ github.sha }}
-        tag: ${{ env.TAG_ANME }}
-        artifacts: trunk/images/*.trx
-        allowUpdates: true
+    - name: Start build
+        run: |
+          cd trunk
+          fakeroot ./build_firmware_ci K2P
+      - name: Upload image
+        uses: actions/upload-artifact@v3
+        with:
+          name: images
+          path: trunk/images/*.trx
