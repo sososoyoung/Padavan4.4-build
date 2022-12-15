@@ -41,8 +41,6 @@ jobs:
           mkdir -p /opt/images/
       
       - name: Build
-        env:
-        TNAME: B70
         run: |
           cd /opt/rt-n56u/trunk
           sudo ./build_firmware_modify $TNAME 0
