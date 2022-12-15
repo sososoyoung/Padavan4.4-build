@@ -42,9 +42,11 @@ jobs:
       
       - name: Build
         run: |
-          cd /opt/rt-n56u/trunk
-          sudo ./build_firmware_modify $TNAME 0
-          sudo mv -f images/*.trx /opt/images/          
+          cd trunk
+          mkdir -p ${images_dir}
+          for m in $targets; do fakeroot ./build_firmware_ci $m; \
+          if [ $? = 0 ]; then cp -f images/*.trx ${images_dir}/$m.trx; else exit 1; fi; \
+          ./clear_tree_simple >/dev/null 2>&1; done         
       - uses: actions/upload-artifact@v3
         with:
           name: images
