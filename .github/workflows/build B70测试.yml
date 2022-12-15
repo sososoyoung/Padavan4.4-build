@@ -42,11 +42,11 @@ jobs:
         sh dl_toolchain.sh
         mkdir -p /opt/images/
     - name: Start build
-        run: |
-          cd trunk
-          fakeroot ./build_firmware_ci K2P
-      - name: Upload image
-        uses: actions/upload-artifact@v3
-        with:
-          name: images
-          path: trunk/images/*.trx
+      run: |
+        cd trunk
+        fakeroot ./build_firmware_ci K2P
+    - name: Upload image
+      uses: actions/upload-artifact@v3
+      with:
+        name: images
+        path: trunk/images/*.trx
