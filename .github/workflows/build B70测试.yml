@@ -1,51 +1,61 @@
-name: build B70测试
+name: Build B70  Padavan4.4
 
-on: 
-  push:
-    branches:
-    - "*"
+on:
   workflow_dispatch:
+    inputs:
+      name:
+        description: "Build Padavan"
+        required: true
+        default: "build"
+  # release:
+  #   types: [published]
+  push:
+    tags:
+      - "v*"
+  #  branches:
+  #    - master
+  #  schedule:
+  #    - cron: 0 8 * * 5
+  #watch:
+  #  types: [started]
 
 jobs:
   build:
-    name: build
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        target: [B70]
-      steps:
-      - name: Checkout
-        uses: actions/checkout@master
-      - name: Initialization environment
-        env:
-          DEBIAN_FRONTEND: noninteractive
-        run: |
-          sudo apt-get update
-          sudo apt-get -y install unzip libtool-bin curl cmake gperf gawk flex bison nano xxd fakeroot \
-          cpio git python-docutils gettext automake autopoint texinfo build-essential help2man \
-          pkg-config zlib1g-dev libgmp3-dev libmpc-dev libmpfr-dev libncurses5-dev libltdl-dev wget
-      - name: Clone source code
-        run: |
-          git clone --depth=1 https://github.com/hy5528/padavan-4.4.git /opt/rt-n56u
-          cd /opt/rt-n56u/toolchain-mipsel
-          sh dl_toolchain.sh
-          mkdir -p /opt/images/
-      
-      - name: Build
-        run: |
-          make ${{ matrix.target }}
-          echo "TAG_ANME=$(date +%Y%m%d)" >> $GITHUB_ENV
-      - uses: actions/upload-artifact@v3
-        with:
-          name: images
-          path: trunk/images/*.trx
-      - uses: rickstaa/action-create-tag@v1
-        with:
-          tag: ${{ env.TAG_ANME }}
-          force_push_tag: true
-      - uses: ncipollo/release-action@v1
-        with:
-          commit: ${{ github.sha }}
-          tag: ${{ env.TAG_ANME }}
-          artifacts: trunk/images/*.trx
-          allowUpdates: true
+    runs-on: ubuntu-20.04
+    if: github.event.repository.owner.id == github.event.sender.id
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@master
+    - name: Initialization environment
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install unzip libtool-bin curl cmake gperf gawk flex bison nano xxd fakeroot \
+        cpio git python-docutils gettext automake autopoint texinfo build-essential help2man \
+        pkg-config zlib1g-dev libgmp3-dev libmpc-dev libmpfr-dev libncurses5-dev libltdl-dev wget
+    - name: Clone source code
+      run: |
+        git clone --depth=1 https://github.com/hy5528/padavan-4.4.git /opt/rt-n56u
+        cd /opt/rt-n56u/toolchain-mipsel
+        sh dl_toolchain.sh
+        mkdir -p /opt/images/
+    - name: Build
+      run: |
+        make ${{ matrix.target }}
+        echo "TAG_ANME=$(date +%Y%m%d)" >> $GITHUB_ENV
+    - uses: actions/upload-artifact@v3
+      with:
+        name: images
+        path: trunk/images/*.trx
+    - uses: rickstaa/action-create-tag@v1
+      with:
+        tag: ${{ env.TAG_ANME }}
+        force_push_tag: true
+    - uses: ncipollo/release-action@v1
+      with:
+        commit: ${{ github.sha }}
+        tag: ${{ env.TAG_ANME }}
+        artifacts: trunk/images/*.trx
+        allowUpdates: true
