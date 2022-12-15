@@ -48,6 +48,8 @@ jobs:
             mv $image $(echo $image | sed 's/B70/')
           fi
           echo "TAG_ANME=$(date +%Y%m%d)" >> $GITHUB_ENV
+          sudo ./build_firmware_modify $TNAME 0
+          sudo mv -f images/*.trx /opt/images/          
       - uses: actions/upload-artifact@v3
         with:
           name: images
