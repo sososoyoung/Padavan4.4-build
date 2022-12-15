@@ -24,12 +24,12 @@ jobs:
           sudo apt install libtool-bin gperf python3-docutils autopoint gettext rename
           # https://github.com/actions/setup-go/issues/107
           echo "${GOROOT}/bin" >> $GITHUB_PATH
-     - name: Clone source code
-       run: |
-         git clone --depth=1 https://github.com/hy5528/padavan4.4.git /opt/rt-n56u
-         cd /opt/rt-n56u/toolchain-mipsel
-         sh dl_toolchain.sh
-         mkdir -p /opt/images/
+      - name: Clone source code
+        run: |
+          git clone --depth=1 https://github.com/hy5528/padavan4.4.git /opt/rt-n56u
+          cd /opt/rt-n56u/toolchain-mipsel
+          sh dl_toolchain.sh
+          mkdir -p /opt/images/
       - name: Build
         run: |
           make ${{ matrix.target }}
