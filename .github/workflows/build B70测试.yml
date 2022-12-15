@@ -43,7 +43,7 @@ jobs:
       - name: Build
         env:
           TNAME: B70        
-        run: |
+          run: |
           cd trunk
           mkdir -p ${images_dir}
           for m in $targets; do fakeroot ./build_firmware_ci $m; \
