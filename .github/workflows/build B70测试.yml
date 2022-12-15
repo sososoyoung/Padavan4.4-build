@@ -1,4 +1,4 @@
-name: build B70
+name: build B70测试
 
 on: 
   push:
