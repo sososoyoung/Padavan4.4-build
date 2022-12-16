@@ -1,5 +1,5 @@
 #修改TNAME: B70中的B70为你需要编译的型号，注意名称要与configs/templates/目录下的名字相同
-name: Build B70  Padavan4.4测试
+name: Build Padavan4.4测试
 
 on:
   workflow_dispatch:
@@ -44,7 +44,7 @@ jobs:
         mkdir -p /opt/images/
     - name: Build Firmware
       env:
-        TNAME: MSG1500
+        TNAME: BELL-A040WQ
       run: |
         cd /opt/rt-n56u/trunk
         if [ ! -f configs/templates/$TNAME.config ] ; then
@@ -104,5 +104,5 @@ jobs:
       uses: actions/upload-artifact@master
       if: always()
       with:
-        name: Padavan-B70
+        name: Padavan-packages
         path: /opt/images
