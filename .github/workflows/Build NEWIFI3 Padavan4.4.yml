@@ -1,4 +1,4 @@
-#修改TNAME: Newifi中的Newifi为你需要编译的型号，注意名称要与configs/templates/目录下的名字相同
+#修改TNAME: NEWIFI3 中的 NEWIFI3 为你需要编译的型号，注意名称要与configs/templates/目录下的名字相同
 name: Build Newifi  Padavan4.4
 
 on:
@@ -29,7 +29,7 @@ jobs:
         mkdir -p /opt/images/
     - name: Build Firmware
       env:
-        TNAME: NEWIFI
+        TNAME: NEWIFI3
       run: |
         cd /opt/rt-n56u/trunk
         if [ ! -f configs/templates/$TNAME.config ] ; then
@@ -46,9 +46,10 @@ jobs:
         sed -i 's/CONFIG_FIRMWARE_INCLUDE_SCUTCLIENT=y/CONFIG_FIRMWARE_INCLUDE_SCUTCLIENT=n/g' .config
         sed -i 's/CONFIG_FIRMWARE_INCLUDE_SRELAY=y/CONFIG_FIRMWARE_INCLUDE_SRELAY=n/g' .config
         sed -i 's/CONFIG_FIRMWARE_INCLUDE_SHADOWSOCKS=y/CONFIG_FIRMWARE_INCLUDE_SHADOWSOCKS=n/g' .config
-        sed -i 's/CONFIG_FIRMWARE_INCLUDE_LANG_UK=y/CONFIG_FIRMWARE_INCLUDE_LANG_UK=n/g' .config #删除配置项英文界面
-        sed -i 's/CONFIG_FIRMWARE_INCLUDE_QOS=y/CONFIG_FIRMWARE_INCLUDE_QOS=n/g' .config #删除配置项QOS
+        sed -i 's/CONFIG_FIRMWARE_INCLUDE_LANG_UK=y/CONFIG_FIRMWARE_INCLUDE_LANG_UK=n/g' .config
+        sed -i 's/CONFIG_FIRMWARE_INCLUDE_QOS=y/CONFIG_FIRMWARE_INCLUDE_QOS=n/g' .config
         sed -i 's/CONFIG_FIRMWARE_INCLUDE_SMBD36=y/CONFIG_FIRMWARE_INCLUDE_SMBD36=n/g' .config 
+        sed -i 's/CONFIG_FIRMWARE_INCLUDE_SMBD_SYSLOG=y/CONFIG_FIRMWARE_INCLUDE_SMBD_SYSLOG=n/g' .config 
         sed -i 's/CONFIG_FIRMWARE_INCLUDE_DDNS_SSL=y/CONFIG_FIRMWARE_INCLUDE_DDNS_SSL=n/g' .config 
         sed -i 's/CONFIG_FIRMWARE_INCLUDE_HTTPS=y/CONFIG_FIRMWARE_INCLUDE_HTTPS=n/g' .config 
         sed -i 's/CONFIG_FIRMWARE_INCLUDE_OPENVPN=y/CONFIG_FIRMWARE_INCLUDE_OPENVPN=n/g' .config
@@ -62,6 +63,13 @@ jobs:
         sed -i 's/CONFIG_FIRMWARE_INCLUDE_HTOP=y/CONFIG_FIRMWARE_INCLUDE_HTOP=n/g' .config
         sed -i 's/CONFIG_FIRMWARE_INCLUDE_LRZSZ=y/CONFIG_FIRMWARE_INCLUDE_LRZSZ=n/g' .config
         sed -i 's/CONFIG_FIRMWARE_INCLUDE_EAP_PEAP=y/CONFIG_FIRMWARE_INCLUDE_EAP_PEAP=n/g' .config
+        sed -i 's/CONFIG_FIRMWARE_INCLUDE_ANTFS=y/CONFIG_FIRMWARE_INCLUDE_ANTFS=n/g' .config
+        sed -i 's/CONFIG_FIRMWARE_ENABLE_FAT=y/CONFIG_FIRMWARE_ENABLE_FAT=n/g' .config
+        sed -i 's/CONFIG_FIRMWARE_ENABLE_EXFAT=y/CONFIG_FIRMWARE_ENABLE_EXFAT=n/g' .config
+        sed -i 's/CONFIG_FIRMWARE_INCLUDE_CIFS=y/CONFIG_FIRMWARE_INCLUDE_CIFS=n/g' .config
+        sed -i 's/CONFIG_FIRMWARE_INCLUDE_FTPD=y/CONFIG_FIRMWARE_INCLUDE_FTPD=n/g' .config
+        sed -i 's/CONFIG_FIRMWARE_INCLUDE_ARIA=y/CONFIG_FIRMWARE_INCLUDE_ARIA=n/g' .config
+        sed -i 's/CONFIG_FIRMWARE_INCLUDE_ARIA_WEB_CONTROL=y/CONFIG_FIRMWARE_INCLUDE_ARIA_WEB_CONTROL=n/g' .config
         
         ######################################################################
         #以下选项是定义你需要的功能（y=集成,n=忽略），重新写入到.config文件
